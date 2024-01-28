@@ -58,5 +58,53 @@ class LibraryManagementSystem:
         cursor.close()
 
 class Librarian:
-    def __init__(self) -> None:
-        pass
+    def __init__(self):
+        self.librarian = []
+
+    def add_librarian(self,username,password,name,contact_information):
+        cursor = self.connection.cursor()
+        cursor.execute('INSERT INTO librarian (username, password, name, contact_information) VALUES (?, ?, ?, ?)',
+                       (username, password, name, contact_information))
+        self.conn.commit()
+        
+    def edit_librarian(self,new_password,new_contact_information,username):
+        cursor = self.connection.cursor()
+        if new_password:
+            cursor.execute('UPDATE librarian SET password = ? WHERE username = ?',
+                       (new_password,username))
+        elif new_contact_information:
+            cursor.execute('UPDATE librarian SET contact_information = ? WHERE username = ?',
+                       (new_contact_information,username))
+        self.conn.commit()
+
+    def delete_librarian(self,username):
+        cursor = self.connection.cursor()
+        cursor.execute('DELETE FROM librarian username = ?',
+                       (username,))
+        self.conn.commit()
+
+class Publisher:
+    def __init__(self):
+        self.librarian = []
+
+    def add_publisher(self,publisher_name,address,contact_details):
+        cursor = self.connection.cursor()
+        cursor.execute('INSERT INTO publisher (publisher_name,address,contact_details) VALUES (?, ?, ?)',
+                       (publisher_name,address,contact_details))
+        self.conn.commit()
+        
+    def edit_publisher(self,publisher_name,new_address,new_contact_details):
+        cursor = self.connection.cursor()
+        if new_address:
+            cursor.execute('UPDATE publisher SET address = ? WHERE publisher_name = ?',
+                       (new_address,publisher_name))
+        elif new_contact_details:
+            cursor.execute('UPDATE publisher SET contact_details = ? WHERE publisher_name = ?',
+                       (new_contact_details,publisher_name))
+        self.conn.commit()
+
+    def delete_publisher(self,publisher_name):
+        cursor = self.connection.cursor()
+        cursor.execute('DELETE FROM publisher publisher_name = ?',
+                       (publisher_name,))
+        self.conn.commit()        
