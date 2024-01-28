@@ -147,3 +147,5 @@ class Book:
         cursor.execute('DELETE FROM book WHERE book_id = ?',
                        (book_id,))
         self.connection.commit()
+
+
