@@ -1,9 +1,19 @@
 import sqlite3
 
-def connect():
-    return sqlite3.connect('librarysystem.db')
 
 class LibraryManagementSystem:
+    def __init__(self):
+        self.conn = sqlite3.connect('librarysystem.db')
+        self.cursor = self.conn.cursor()
+
+        self.create_tables()
+
+        self.librarians_list = []
+        self.publishers_list = []
+        self.books_list = []
+        self.users_list = []
+        self.transactions_tuple = ()
+    
     def create_tables(self,connection):
         cursor = connection.cursor()
         cursor.execute('''
