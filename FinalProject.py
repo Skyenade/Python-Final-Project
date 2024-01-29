@@ -1,4 +1,5 @@
 import sqlite3
+from collections import namedtuple, defaultdict
 
 
 class LibraryManagementSystem:
@@ -221,3 +222,32 @@ class LibraryManagementSystem:
             cursor.execute('DELETE FROM transaction WHERE transaction_id = ?',
                         (transaction_id,))
             self.connection.commit()
+        def view_transaction_history(self,transaction_id):
+          cursor = self.connection.cursor()
+          cursor.execute('DELETE FROM transaction WHERE transaction_id = ?',
+                       (transaction_id,))
+          self.connection.commit()
+          #Lists and Tuples
+          My_list = [Book, User, Librarian, Publisher,  Transaction]
+          My_tuple = (Transaction )
+          #Dictionaries - Collections Module
+           book_details = {"ISBN": "book_details"}
+          BookRecord = namedtuple ("BookRecord", ["title","author","genre","ISBN","quantity","publication_year"])  
+          book_details["0102030405"] = BookRecord("Junior Level Books              Introduction to Computer","Amit Garg","IT","978-93-5019-561-1",4,2011) 
+          book_details["1121315121"] = BookRecord(" Client Server Computing","Lalit Kumar","IT","978-93-8067-432-2",1,2012) 
+          book_details["21315121314"] = BookRecord(" Data Structure Using C","Sharad Kumar Verma","IT","978-93-5163-389-1",2,2015) 
+
+          ISBN = "0102030405"
+          print("Book details for ISBN", ISBN, book_details.get(ISBN))
+
+          Book_by_genre = defaultdict(list)
+          for ISBN, details in book_details.items():
+              genre = details.genre
+              Book_by_genre[genre].append(ISBN)
+
+          print("Books grouped by genre:")
+          for genre, ISBN_list in Book_by_genre.items():
+              print(genre + ":")
+          for ISBN in ISBN_list:
+              print(" *", book_details[ISBN].title)
+
