@@ -45,13 +45,13 @@ class LibraryManagementSystem:
             ''')
         cursor.execute('''
             create table if not exists transaction(
+            transaction_id primary key autoincrement,
             user_id integer,
             book_id integer,
             due_date date,
-            contact_information text,
+            status text,
             foreign key (user_id) references user (user_id),
             foreign key (book_id) references book (book_id),
-            foreign key (contact_information) references user (contact_information),
             )  
             ''')
         connection.commit()
@@ -67,20 +67,23 @@ class Librarian:
                        (username, password, name, contact_information))
         self.connection.commit()
         
-    def edit_librarian(self,new_password,new_contact_information,username):
+    def edit_librarian(self,new_password,new_contact_information,new_username,librarian_id):
         cursor = self.connection.cursor()
         if new_password:
-            cursor.execute('UPDATE librarian SET password = ? WHERE username = ?',
-                       (new_password,username))
+            cursor.execute('UPDATE librarian SET password = ? WHERE librarian_id = ?',
+                       (new_password,librarian_id))
         elif new_contact_information:
-            cursor.execute('UPDATE librarian SET contact_information = ? WHERE username = ?',
-                       (new_contact_information,username))
+            cursor.execute('UPDATE librarian SET contact_information = ? WHERE librarian_id = ?',
+                       (new_contact_information,librarian_id))
+        elif new_username:
+            cursor.execute('UPDATE librarian SET username = ? WHERE librarian_id = ?',
+                       (new_username,librarian_id))
         self.connection.commit()
 
-    def delete_librarian(self,username):
+    def delete_librarian(self,librarian_id):
         cursor = self.connection.cursor()
-        cursor.execute('DELETE FROM librarian WHERE username = ?',
-                       (username,))
+        cursor.execute('DELETE FROM librarian WHERE librarian_id = ?',
+                       (librarian_id,))
         self.connection.commit()
 
 class Publisher:
@@ -93,20 +96,23 @@ class Publisher:
                        (publisher_name,address,contact_details))
         self.connection.commit()
         
-    def edit_publisher(self,publisher_name,new_address,new_contact_details):
+    def edit_publisher(self,new_publisher_name,new_address,new_contact_details,publisher_id):
         cursor = self.connection.cursor()
         if new_address:
-            cursor.execute('UPDATE publisher SET address = ? WHERE publisher_name = ?',
-                       (new_address,publisher_name))
+            cursor.execute('UPDATE publisher SET address = ? WHERE publisher_id = ?',
+                       (new_address,publisher_id))
         elif new_contact_details:
-            cursor.execute('UPDATE publisher SET contact_details = ? WHERE publisher_name = ?',
-                       (new_contact_details,publisher_name))
+            cursor.execute('UPDATE publisher SET contact_details = ? WHERE publisher_id = ?',
+                       (new_contact_details,publisher_id))
+        elif new_publisher_name:
+            cursor.execute('UPDATE publisher SET publisher_name = ? WHERE publisher_id = ?',
+                       (new_publisher_name,publisher_id))
         self.connection.commit()
 
-    def delete_publisher(self,publisher_name):
+    def delete_publisher(self,publisher_id):
         cursor = self.connection.cursor()
-        cursor.execute('DELETE FROM publisher WHERE publisher_name = ?',
-                       (publisher_name,))
+        cursor.execute('DELETE FROM publisher WHERE publisher_id = ?',
+                       (publisher_id,))
         self.connection.commit()
 
 class Book:
@@ -122,22 +128,22 @@ class Book:
     def edit_book(self,new_title,new_author,new_genre,new_ISBN,new_quantity,new_publication_year,book_id):
         cursor = self.connection.cursor()
         if new_title:
-            cursor.execute('UPDATE publisher SET title = ? WHERE book_id = ?',
+            cursor.execute('UPDATE book SET title = ? WHERE book_id = ?',
                        (new_title,book_id))
         elif new_author:
-            cursor.execute('UPDATE publisher SET author = ? WHERE book_id = ?',
+            cursor.execute('UPDATE book SET author = ? WHERE book_id = ?',
                        (new_author,book_id))
         elif new_genre:
-            cursor.execute('UPDATE publisher SET genre = ? WHERE book_id = ?',
+            cursor.execute('UPDATE book SET genre = ? WHERE book_id = ?',
                        (new_genre,book_id))
         elif new_ISBN:
-            cursor.execute('UPDATE publisher SET ISBN = ? WHERE book_id = ?',
+            cursor.execute('UPDATE book SET ISBN = ? WHERE book_id = ?',
                        (new_ISBN,book_id))
         elif new_quantity:
-            cursor.execute('UPDATE publisher SET quantity = ? WHERE book_id = ?',
+            cursor.execute('UPDATE book SET quantity = ? WHERE book_id = ?',
                        (new_quantity,book_id))
         elif new_publication_year:
-            cursor.execute('UPDATE publisher SET publication_year = ? WHERE book_id = ?',
+            cursor.execute('UPDATE book SET publication_year = ? WHERE book_id = ?',
                        (new_publication_year,book_id))  
         self.connection.commit()
         
@@ -149,3 +155,59 @@ class Book:
         self.connection.commit()
 
 
+class User:
+    def __init__(self, connection):
+        self.connection = connection
+
+    def add_user(self,username,password,name,contact_information,user_id):
+        cursor = self.connection.cursor()
+        cursor.execute('INSERT INTO book (username,password,name,contact_information) VALUES (?, ?, ?, ?)',
+                       (username,password,name,contact_information))
+        self.connection.commit()
+
+    def edit_user(self,new_username,new_password,new_name,new_contact_information,user_id):
+        cursor = self.connection.cursor()
+        if new_password:
+            cursor.execute('UPDATE user SET password = ? WHERE user_id = ?',
+                       (new_password,user_id))
+        elif new_name:
+            cursor.execute('UPDATE user SET name = ? WHERE user_id = ?',
+                       (new_name,user_id))
+        elif new_contact_information:
+            cursor.execute('UPDATE user SET contact_information = ? WHERE user_id = ?',
+                       (new_contact_information,user_id))
+        elif new_username:
+            cursor.execute('UPDATE user SET username = ? WHERE user_id = ?',
+                       (new_username,user_id))
+        self.connection.commit()
+        
+
+    def delete_user(self,user_id):
+        cursor = self.connection.cursor()
+        cursor.execute('DELETE FROM user WHERE user_id = ?',
+                       (user_id,))
+        self.connection.commit()
+
+class Transaction:
+    def __init__(self, connection):
+        self.connection = connection
+
+    def check_out_book(self,user_id,book_id,due_date,status):
+        cursor = self.connection.cursor()
+        cursor.execute('INSERT INTO transaction (user_id,book_id,due_date,status) VALUES (?, ?, ?, ?)',
+                       (user_id,book_id,due_date,status))
+        self.connection.commit()
+
+    def check_in_book(self,new_status,transaction_id):
+        cursor = self.connection.cursor()
+        cursor.execute('UPDATE transaction SET status = ? WHERE transaction_id = ?',
+                       (new_status,transaction_id))
+        
+        self.connection.commit()
+        
+
+    def view_transaction_history(self,transaction_id):
+        cursor = self.connection.cursor()
+        cursor.execute('DELETE FROM transaction WHERE transaction_id = ?',
+                       (transaction_id,))
+        self.connection.commit()
