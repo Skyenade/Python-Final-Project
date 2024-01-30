@@ -6,14 +6,13 @@ class LibraryManagementSystem:
     publishers_list = []
     books_list = []
     users_list = []
-    transactions_tuple = ()
+    transactions_list = []
+    ISBN_tuple = ()
 
     def __init__(self):
         self.connection = sqlite3.connect('librarysystem.db')
         self.cursor = self.connection.cursor()
-        self.create_tables()
-
-        
+        self.create_tables()        
     
     def create_tables(self,connection):
         cursor = connection.cursor()
@@ -165,6 +164,14 @@ class LibraryManagementSystem:
             cursor.execute('INSERT INTO user (username, password, name, contact_information) VALUES (?, ?, ?, ?)',
                            (username, password, name, contact_information))
             LibraryManagementSystem.users_list.append()
+
+            #
+            #
+            #
+        
+
+
+
 
     class Librarian:
         def __init__(self,connection, username, password, name, contact_information):
@@ -361,14 +368,13 @@ class LibraryManagementSystem:
             cursor.execute('UPDATE transaction SET status = ? WHERE transaction_id = ?',
                         (new_status,transaction_id))
             
+            
             self.connection.commit()
             
 
         def view_transaction_history(self,transaction_id):
             cursor = self.connection.cursor()
-            cursor.execute('DELETE FROM transaction WHERE transaction_id = ?',
+            cursor.execute('SELECT * transaction WHERE transaction_id = ?',
                         (transaction_id,))
             self.connection.commit()
 
-        def display_info(self):
-            print(f"Username {self.username}, password {self.password}, name {self.name}, contact information {self.contact_information}")
