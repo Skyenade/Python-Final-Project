@@ -2,17 +2,18 @@ import sqlite3
 
 
 class LibraryManagementSystem:
-    def __init__(self):
-        self.conn = sqlite3.connect('librarysystem.db')
-        self.cursor = self.conn.cursor()
+    librarians_list = []
+    publishers_list = []
+    books_list = []
+    users_list = []
+    transactions_tuple = ()
 
+    def __init__(self):
+        self.connection = sqlite3.connect('librarysystem.db')
+        self.cursor = self.connection.cursor()
         self.create_tables()
 
-        self.librarians_list = []
-        self.publishers_list = []
-        self.books_list = []
-        self.users_list = []
-        self.transactions_tuple = ()
+        
     
     def create_tables(self,connection):
         cursor = connection.cursor()
@@ -43,8 +44,7 @@ class LibraryManagementSystem:
             ''')
         cursor.execute('''
             create table if not exists user(
-            user_id integer primary key autoincrement,
-            username text,
+            username text primary key,
             password text,
             name text,
             contact_information text
@@ -53,26 +53,132 @@ class LibraryManagementSystem:
         cursor.execute('''
             create table if not exists transaction(
             transaction_id primary key autoincrement,
-            user_id integer,
-            book_id integer,
+            username integer,
+            ISBN integer,
             due_date date,
             status text,
-            foreign key (user_id) references user (user_id),
-            foreign key (book_id) references book (book_id),
+            foreign key (username) references user (username),
+            foreign key (ISBN) references book (ISBN),
             )  
             ''')
         connection.commit()
         cursor.close()
 
-    class Librarian:
+
+    class Administrator:
         def __init__(self, connection):
             self.connection = connection
+
+        def add_librarian(self, username, password, name, contact_information):
+            cursor = self.connection.cursor()
+            cursor.execute('INSERT INTO librarian (username, password, name, contact_information) VALUES (?, ?, ?, ?)',
+                           (username, password, name, contact_information))
+            LibraryManagementSystem.librarians_list.append(username, password, name, contact_information)
+            self.connection.commit()
+
+        def edit_librarian(self, username, new_password, new_name, new_contact_information):
+            cursor = self.connection.cursor()
+
+            if new_password:
+                cursor.execute('UPDATE librarian SET password = ? WHERE username = ?',
+                               (new_password, username))
+
+                for librarian_data in LibraryManagementSystem.librarians_list:
+                    if librarian_data[0] == username:
+                        librarian_data = (
+                            librarian_data[0], new_password, librarian_data[2], librarian_data[3])
+
+            elif new_contact_information:
+                cursor.execute('UPDATE librarian SET contact_information = ? WHERE username = ?',
+                               (new_contact_information, username))
+
+                for librarian_data in LibraryManagementSystem.librarians_list:
+                    if librarian_data[0] == username:
+                        librarian_data = (
+                            librarian_data[0], librarian_data[1], librarian_data[2], new_contact_information)
+
+            elif new_name:
+                cursor.execute('UPDATE librarian SET username = ? WHERE username = ?',
+                               (new_name, username))
+
+                for librarian_data in LibraryManagementSystem.librarians_list:
+                    if librarian_data[0] == username:
+                        librarian_data = (
+                            librarian_data[0], librarian_data[1], new_name, librarian_data[3])
+
+            self.connection.commit()
+
+        def delete_librarian(self, username):
+            cursor = self.connection.cursor()
+            cursor.execute('DELETE FROM librarian WHERE username = ?',
+                           (username,))
+
+            LibraryManagementSystem.librarians_list = [
+                data for data in LibraryManagementSystem.librarians_list if data[0] != username]
+
+            self.connection.commit()
+
+        def add_publisher(self, publisher_name, address, contact_details):
+            cursor = self.connection.cursor()
+            cursor.execute('INSERT INTO publisher (publisher_name, address, contact_details) VALUES (?, ?, ?)',
+                           (publisher_name, address, contact_details))
+
+            LibraryManagementSystem.publishers_list.append(
+                (publisher_name, address, contact_details))
+
+            self.connection.commit()
+
+        def edit_publisher(self, publisher_name, new_address, new_contact_details):
+            cursor = self.connection.cursor()
+            if new_address:
+                cursor.execute('UPDATE publisher SET address = ? WHERE publisher_name = ?',
+                               (new_address, publisher_name))
+
+                for publisher_data in LibraryManagementSystem.publishers_list:
+                    if publisher_data[0] == publisher_name:
+                        publisher_data = (
+                            publisher_data[0], new_address, publisher_data[2])
+
+            elif new_contact_details:
+                cursor.execute('UPDATE publisher SET contact_details = ? WHERE publisher_name = ?',
+                               (new_contact_details, publisher_name))
+
+                for publisher_data in LibraryManagementSystem.publishers_list:
+                    if publisher_data[0] == publisher_name:
+                        publisher_data = (
+                            publisher_data[0], publisher_data[1], new_contact_details)
+
+            self.connection.commit()
+
+        def delete_publisher(self, publisher_name):
+            cursor = self.connection.cursor()
+            cursor.execute('DELETE FROM publisher WHERE publisher_name = ?',
+                           (publisher_name,))
+
+            LibraryManagementSystem.publishers_list = [
+                data for data in LibraryManagementSystem.publishers_list if data[0] != publisher_name]
+
+            self.connection.commit()
+
+        def add_user(self, username, password, name, contact_information):
+            cursor = self.connection.cursor()
+            cursor.execute('INSERT INTO user (username, password, name, contact_information) VALUES (?, ?, ?, ?)',
+                           (username, password, name, contact_information))
+            LibraryManagementSystem.users_list.append()
+
+    class Librarian:
+        def __init__(self,connection, username, password, name, contact_information):
+            self.connection = connection
+            self.username = username
+            self.password = password
+            self.name = name
+            self.contact_information = contact_information
 
         def add_librarian(self,username,password,name,contact_information):
             cursor = self.connection.cursor()
             cursor.execute('INSERT INTO librarian (username, password, name, contact_information) VALUES (?, ?, ?, ?)',
                         (username, password, name, contact_information))
-            LibraryManagementSystem.librarians_list.append(self.username, self.password, self.name, self.contact_info)
+            LibraryManagementSystem.librarians_list.append(self.username, self.password, self.name, self.contact_information)
             self.connection.commit()
             
         def edit_librarian(self,username,new_password,new_name,new_contact_information):
@@ -91,7 +197,7 @@ class LibraryManagementSystem:
                         (new_contact_information,username))
                 
                 for librarian_data in LibraryManagementSystem.librarians_list:
-                    if librarian_data[0] == new_contact_information:
+                    if librarian_data[0] == username:
                         librarian_data = (librarian_data[0], librarian_data[1], librarian_data[2], new_contact_information)
 
             elif new_name:
@@ -99,7 +205,7 @@ class LibraryManagementSystem:
                         (new_name,username))
                 
                 for librarian_data in LibraryManagementSystem.librarians_list:
-                    if librarian_data[0] == new_name:
+                    if librarian_data[0] == username:
                         librarian_data = (librarian_data[0], librarian_data[1], new_name, librarian_data[3])
             
             self.connection.commit()
@@ -114,37 +220,57 @@ class LibraryManagementSystem:
 
             self.connection.commit()
 
+        def display_info(self):
+            print(f"Librarian {self.name}, username {self.username}, password {self.password}, contact information {self.contact_information}")
+
+
     class Publisher:
-        def __init__(self, connection):
+        def __init__(self, connection,publisher_name,address,contact_details):
             self.connection = connection
+            self.publisher_name = publisher_name
+            self.address = address
+            self.contact_details = contact_details
 
         def add_publisher(self,publisher_name,address,contact_details):
             cursor = self.connection.cursor()
             cursor.execute('INSERT INTO publisher (publisher_name,address,contact_details) VALUES (?, ?, ?)',
                         (publisher_name,address,contact_details))
             
-            LibraryManagementSystem.publishers_list.append(self.username, self.password, self.name, self.contact_info)
+            LibraryManagementSystem.publishers_list.append(self.publisher_name, self.address, self.contact_details)
 
             self.connection.commit()
             
-        def edit_publisher(self,new_publisher_name,new_address,new_contact_details,publisher_id):
+        def edit_publisher(self,publisher_name,new_address,new_contact_details):
             cursor = self.connection.cursor()
             if new_address:
-                cursor.execute('UPDATE publisher SET address = ? WHERE publisher_id = ?',
-                        (new_address,publisher_id))
+                cursor.execute('UPDATE publisher SET address = ? WHERE publisher_name = ?',
+                        (new_address,publisher_name))
+                
+                for publisher_data in LibraryManagementSystem.publishers_list:
+                    if publisher_data[0] == publisher_name:
+                        publisher_data = (publisher_data[0], new_address, publisher_data[2])
+
             elif new_contact_details:
-                cursor.execute('UPDATE publisher SET contact_details = ? WHERE publisher_id = ?',
-                        (new_contact_details,publisher_id))
-            elif new_publisher_name:
-                cursor.execute('UPDATE publisher SET publisher_name = ? WHERE publisher_id = ?',
-                        (new_publisher_name,publisher_id))
+                cursor.execute('UPDATE publisher SET contact_details = ? WHERE publisher_name = ?',
+                        (new_contact_details,publisher_name))
+                
+                for publisher_data in LibraryManagementSystem.publishers_list:
+                    if publisher_data[0] == publisher_name:
+                        publisher_data = (publisher_data[0], publisher_data[1], new_contact_details)
+            
             self.connection.commit()
 
-        def delete_publisher(self,publisher_id):
+        def delete_publisher(self,publisher_name):
             cursor = self.connection.cursor()
-            cursor.execute('DELETE FROM publisher WHERE publisher_id = ?',
-                        (publisher_id,))
+            cursor.execute('DELETE FROM publisher WHERE publisher_name = ?',
+                        (publisher_name,))
+            
+            LibraryManagementSystem.publishers_list = [data for data in LibraryManagementSystem.publishers_list if data[0] != publisher_name]
+
             self.connection.commit()
+
+        def display_info(self):
+            print(f"Publisher {self.publisher_name}, address {self.address}, contact details {self.contact_details}")
 
     class Book:
         def __init__(self, connection):
@@ -156,68 +282,69 @@ class LibraryManagementSystem:
                         (title,author,genre,ISBN,quantity,publication_year))
             self.connection.commit()
             
-        def edit_book(self,new_title,new_author,new_genre,new_ISBN,new_quantity,new_publication_year,book_id):
+        def edit_book(self,new_title,new_author,new_genre,ISBN,new_quantity,new_publication_year):
             cursor = self.connection.cursor()
             if new_title:
-                cursor.execute('UPDATE book SET title = ? WHERE book_id = ?',
-                        (new_title,book_id))
+                cursor.execute('UPDATE book SET title = ? WHERE ISBN = ?',
+                        (new_title,ISBN))
             elif new_author:
-                cursor.execute('UPDATE book SET author = ? WHERE book_id = ?',
-                        (new_author,book_id))
+                cursor.execute('UPDATE book SET author = ? WHERE ISBN = ?',
+                        (new_author,ISBN))
             elif new_genre:
-                cursor.execute('UPDATE book SET genre = ? WHERE book_id = ?',
-                        (new_genre,book_id))
-            elif new_ISBN:
-                cursor.execute('UPDATE book SET ISBN = ? WHERE book_id = ?',
-                        (new_ISBN,book_id))
+                cursor.execute('UPDATE book SET genre = ? WHERE ISBN = ?',
+                        (new_genre,ISBN))
             elif new_quantity:
-                cursor.execute('UPDATE book SET quantity = ? WHERE book_id = ?',
-                        (new_quantity,book_id))
+                cursor.execute('UPDATE book SET quantity = ? WHERE ISBN = ?',
+                        (new_quantity,ISBN))
             elif new_publication_year:
-                cursor.execute('UPDATE book SET publication_year = ? WHERE book_id = ?',
-                        (new_publication_year,book_id))  
+                cursor.execute('UPDATE book SET publication_year = ? WHERE ISBN = ?',
+                        (new_publication_year,ISBN))  
             self.connection.commit()
             
 
-        def delete_book(self,book_id):
+        def delete_book(self,ISBN):
             cursor = self.connection.cursor()
-            cursor.execute('DELETE FROM book WHERE book_id = ?',
-                        (book_id,))
+            cursor.execute('DELETE FROM book WHERE ISBN = ?',
+                        (ISBN,))
             self.connection.commit()
 
+        def display_info(self):
+            print(f"Book title {self.tile}, author {self.author}, genre {self.genre}, ISBN {self.ISBN}, quantity {self.quantity}, publication year {self.publication_year}")
 
     class User:
         def __init__(self, connection):
             self.connection = connection
 
-        def add_user(self,username,password,name,contact_information,user_id):
+        def add_user(self,username,password,name,contact_information):
             cursor = self.connection.cursor()
-            cursor.execute('INSERT INTO book (username,password,name,contact_information) VALUES (?, ?, ?, ?)',
+            cursor.execute('INSERT INTO user (username,password,name,contact_information) VALUES (?, ?, ?, ?)',
                         (username,password,name,contact_information))
             self.connection.commit()
 
-        def edit_user(self,new_username,new_password,new_name,new_contact_information,user_id):
+        def edit_user(self,username,new_password,new_name,new_contact_information):
             cursor = self.connection.cursor()
             if new_password:
-                cursor.execute('UPDATE user SET password = ? WHERE user_id = ?',
-                        (new_password,user_id))
+                cursor.execute('UPDATE user SET password = ? WHERE username = ?',
+                        (new_password,username))
             elif new_name:
-                cursor.execute('UPDATE user SET name = ? WHERE user_id = ?',
-                        (new_name,user_id))
+                cursor.execute('UPDATE user SET name = ? WHERE username = ?',
+                        (new_name,username))
             elif new_contact_information:
-                cursor.execute('UPDATE user SET contact_information = ? WHERE user_id = ?',
-                        (new_contact_information,user_id))
-            elif new_username:
-                cursor.execute('UPDATE user SET username = ? WHERE user_id = ?',
-                        (new_username,user_id))
+                cursor.execute('UPDATE user SET contact_information = ? WHERE username = ?',
+                        (new_contact_information,username))
+                
             self.connection.commit()
             
 
-        def delete_user(self,user_id):
+        def delete_user(self,username):
             cursor = self.connection.cursor()
-            cursor.execute('DELETE FROM user WHERE user_id = ?',
-                        (user_id,))
+            cursor.execute('DELETE FROM user WHERE username = ?',
+                        (username,))
             self.connection.commit()
+
+        def display_info(self):
+            print(f"Username {self.username}, password {self.password}, name {self.name}, contact information {self.contact_information}")
+
 
     class Transaction:
         def __init__(self, connection):
@@ -242,3 +369,6 @@ class LibraryManagementSystem:
             cursor.execute('DELETE FROM transaction WHERE transaction_id = ?',
                         (transaction_id,))
             self.connection.commit()
+
+        def display_info(self):
+            print(f"Username {self.username}, password {self.password}, name {self.name}, contact information {self.contact_information}")
