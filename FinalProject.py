@@ -213,9 +213,12 @@ class Transaction:
                        (transaction_id,))
         self.connection.commit()
     #Lists and Tuples
-        My_list = [Book, User, Librarian, Publisher,  Transaction]
+        
+        My_list = [Book, User, Librarian, Publisher]
         My_tuple = (Transaction )
+
     #Dictionaries - Collections Module
+        
         book_details = {"ISBN": "book_details"}
         BookRecord = namedtuple ("BookRecord", ["title","author","genre","ISBN","quantity","publication_year"])  
         book_details["0102030405"] = BookRecord("Junior Level Books              Introduction to Computer","Amit Garg","IT","978-93-5019-561-1",4,2011) 
@@ -236,4 +239,5 @@ class Transaction:
             for ISBN in ISBN_list:
                 print(" *", book_details[ISBN].title)    
 
+    #OOP Concepts:
 
