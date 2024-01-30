@@ -109,9 +109,9 @@ class LibraryManagementSystem:
             cursor.execute('DELETE FROM librarian WHERE username = ?',
                         (username,))
             
-            for librarian_data in LibraryManagementSystem.librarians_list:
-                    if librarian_data[0] == username:
-                        librarian_data = (librarian_data[0], new_password, librarian_data[2], librarian_data[3])
+            LibraryManagementSystem.librarians_list = [data for data in LibraryManagementSystem.librarians_list if data[0] != username]
+
+
             self.connection.commit()
 
     class Publisher:
@@ -122,6 +122,9 @@ class LibraryManagementSystem:
             cursor = self.connection.cursor()
             cursor.execute('INSERT INTO publisher (publisher_name,address,contact_details) VALUES (?, ?, ?)',
                         (publisher_name,address,contact_details))
+            
+            LibraryManagementSystem.publishers_list.append(self.username, self.password, self.name, self.contact_info)
+
             self.connection.commit()
             
         def edit_publisher(self,new_publisher_name,new_address,new_contact_details,publisher_id):
