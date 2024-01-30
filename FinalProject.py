@@ -19,8 +19,7 @@ class LibraryManagementSystem:
         cursor = connection.cursor()
         cursor.execute('''
             create table if not exists librarian(
-            librarian_id integer primary key autoincrement,
-            username text,
+            username text primary key,
             password text,
             name text,
             contact_information text
@@ -28,19 +27,17 @@ class LibraryManagementSystem:
             ''')
         cursor.execute('''
             create table if not exists publisher(
-            publisher_id integer primary key autoincrement,
-            publisher_name text,
+            publisher_name text primary key,
             address text,
             contact_details text
             )  
             ''')
         cursor.execute('''
             create table if not exists book(
-            book_id integer primary key autoincrement,
             title text,
             author text,
             genre text,
-            ISBN integer,
+            ISBN integer primary key,
             quantity integer,
             publication_year integer
             )  
@@ -76,25 +73,46 @@ class LibraryManagementSystem:
             cursor = self.connection.cursor()
             cursor.execute('INSERT INTO librarian (username, password, name, contact_information) VALUES (?, ?, ?, ?)',
                         (username, password, name, contact_information))
+            LibraryManagementSystem.librarians_list.append(self.username, self.password, self.name, self.contact_info)
             self.connection.commit()
             
-        def edit_librarian(self,new_password,new_contact_information,new_username,librarian_id):
+        def edit_librarian(self,username,new_password,new_name,new_contact_information):
             cursor = self.connection.cursor()
+
             if new_password:
-                cursor.execute('UPDATE librarian SET password = ? WHERE librarian_id = ?',
-                        (new_password,librarian_id))
+                cursor.execute('UPDATE librarian SET password = ? WHERE username = ?',
+                        (new_password,username))
+                
+                for librarian_data in LibraryManagementSystem.librarians_list:
+                    if librarian_data[0] == username:
+                        librarian_data = (librarian_data[0], new_password, librarian_data[2], librarian_data[3])
+
             elif new_contact_information:
-                cursor.execute('UPDATE librarian SET contact_information = ? WHERE librarian_id = ?',
-                        (new_contact_information,librarian_id))
-            elif new_username:
-                cursor.execute('UPDATE librarian SET username = ? WHERE librarian_id = ?',
-                        (new_username,librarian_id))
+                cursor.execute('UPDATE librarian SET contact_information = ? WHERE username = ?',
+                        (new_contact_information,username))
+                
+                for librarian_data in LibraryManagementSystem.librarians_list:
+                    if librarian_data[0] == new_contact_information:
+                        librarian_data = (librarian_data[0], librarian_data[1], librarian_data[2], new_contact_information)
+
+            elif new_name:
+                cursor.execute('UPDATE librarian SET username = ? WHERE username = ?',
+                        (new_name,username))
+                
+                for librarian_data in LibraryManagementSystem.librarians_list:
+                    if librarian_data[0] == new_name:
+                        librarian_data = (librarian_data[0], librarian_data[1], new_name, librarian_data[3])
+            
             self.connection.commit()
 
-        def delete_librarian(self,librarian_id):
+        def delete_librarian(self,username):
             cursor = self.connection.cursor()
-            cursor.execute('DELETE FROM librarian WHERE librarian_id = ?',
-                        (librarian_id,))
+            cursor.execute('DELETE FROM librarian WHERE username = ?',
+                        (username,))
+            
+            for librarian_data in LibraryManagementSystem.librarians_list:
+                    if librarian_data[0] == username:
+                        librarian_data = (librarian_data[0], new_password, librarian_data[2], librarian_data[3])
             self.connection.commit()
 
     class Publisher:
