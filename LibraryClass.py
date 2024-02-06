@@ -10,7 +10,7 @@ class projectPython:
 
 # function to connect python to a database
 def connect():
-    return sqlite3.connect('Library.db')
+    return sqlite3.connect('LibraryDatabase.db')
 
 
 class CommonUser(projectPython):
@@ -199,7 +199,7 @@ class TransactionManagement(Transaction):
 
 ## Database class to implement the tables and functions
 class Database:
-    def __init__(self, db_file='PythonProject.db'):  ## file storage and filename
+    def __init__(self, db_file='LibraryDatabase.db'):  ## file storage and filename
         self.conn = sqlite3.connect(db_file)
         self.cursor = self.conn.cursor()
         self.create_tables()
@@ -519,7 +519,7 @@ if __name__ == "__main__":
                             contactInfo = input("please enter the contact information: ")
                             lib1 = CommonUser(username, password, name, contactInfo)
                             db.insert_librarian(lib1)
-                            print(f"{lib1} added to the database.")
+                            print(f"{username} added to the database.")
 
                         elif libChoice == '2':
                             updateUsername = input("Please enter the librarian username to update from the table: ")
@@ -560,7 +560,7 @@ if __name__ == "__main__":
                             contactdetails = input("Please enter the contact details: ")
                             pub1 = Publisher(publishername, address, contactdetails)
                             db.insert_publisher(pub1)
-                            print(f"{pub1} added to the database.")
+                            print(f"{publishername} added to the database.")
 
                         elif pubChoice == '2':
                             updatePublishername = input("Please enter the publisher name to update from the table: ")
@@ -760,7 +760,7 @@ if __name__ == "__main__":
                             contactInfo = input("please enter the contact information")
                             user1 = CommonUser(username, password, name, contactInfo)
                             db.insert_user(user1)
-                            print(f"{user1} added to the storage.")
+                            print(f"{username} added to the storage.")
 
 
                         ## If the user wants to update the user information based on book username
