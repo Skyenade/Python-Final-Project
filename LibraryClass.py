@@ -1,4 +1,5 @@
-
+## Project by Maina Canhini Lisboa de Aguiar - 2392776 and Viviana Montoya Velez - 2395170 
+## https://github.com/Skyenade/Python-Final-Project
 
 import sqlite3  ## to write the SQL queries
 import datetime
