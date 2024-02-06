@@ -250,15 +250,11 @@ class Database:
 
     # database method to delete a librarian 
     def delete_librarian(self, username):
-        # Execute SQL query to delete librarian based on username
         self.cursor.execute('''
             DELETE FROM Librarian WHERE username = ?
         ''', (username,))
 
     ## database method to update the librarian records      
-    def update_librarian(self, username, password, name, contactInfo):
-        self.update_entry(username, password, name, contactInfo)
-
     def update_librarian(self, username, password, name, contactInfo):
         self.cursor.execute('''
             UPDATE Librarian
@@ -287,15 +283,10 @@ class Database:
 
     ## database method to insert the User records
 
-
-    # database method to inser the user 
     def insert_user(self, user):
-        self.add_entry(
-            user.username,
-            user.password,
-            user.name,
-            user.contactInfo
-        )
+        self.cursor.execute('''
+            INSERT INTO User (username, password, name, contactInfo) VALUES (?, ?, ?, ?)
+        ''', (user.username, user.password, user.name, user.contactInfo))
 
     # database method to delete a librarian 
     def delete_user(self, username):
