@@ -9,10 +9,10 @@ def connect():
     return sqlite3.connect('Library.db')
 
 
-class projectPython:
+class projectPython():
     def __init__(self):
         pass
-
+    
 
 class CommonUser(projectPython):
     def __init__(self, username, password, name, contactInfo):
@@ -65,7 +65,6 @@ class Transaction(projectPython):
 
 
 ## User management with storage - add_record , modify_record, delete_record
-
 class CommonUserManagement(CommonUser):
     def __init__(self):
         self.storage = []
@@ -94,7 +93,6 @@ class CommonUserManagement(CommonUser):
 
 
 ## Publisher management class to add, modify and delete entries
-
 class PublisherManagement(Publisher):
     def __init__(self):
         self.publishstorage = []
@@ -121,7 +119,6 @@ class PublisherManagement(Publisher):
 
 
 ## Book management class to add, modify and delete entries
-
 class BookManagement(Book):
     def __init__(self):
         self.bookstorage = []
@@ -160,8 +157,6 @@ class TransactionManagement(Transaction):
             {"User :": CommonUser, "Book ISBN": ISBN, "Due date is: ": duedate, "status : ": duestatus})
         self.Trans_storage.append(transactionrecord)
 
-
-
     ##check in recods with status value updated        
     def check_in_book(self, CommonUser, ISBN):
         for transactionrecord in self.Trans_storage:
@@ -171,9 +166,7 @@ class TransactionManagement(Transaction):
                 return
         print(f"No matching check-out record found for user {CommonUser} and book ISBN {ISBN}.")
 
-
-
-
+    # view the transaction history
     def transaction_history(self):
         if self.Trans_storage:
             print("Transaction History: ")
@@ -187,9 +180,8 @@ class TransactionManagement(Transaction):
 
 
 ## Database class to implement the tables and functions
-
 class Database:
-    def __init__(self, db_file='PythonProject.db'):  ##file storage and filename
+    def __init__(self, db_file='PythonProject.db'):  ## file storage and filename
         self.conn = sqlite3.connect(db_file)
         self.cursor = self.conn.cursor()
         self.create_tables()
@@ -248,36 +240,78 @@ class Database:
         ## to commit the changes
         self.conn.commit()
 
-        ## database method to insert the librarian records
 
-  #  def insert_librarian(self, librarian):
 
-    
+    ## database method to insert the librarian records
+class LibrarianManagement(CommonUserManagement):
+    def __init__(self):
+        super().__init__()
 
-  #  def delete_librarian(self, username):
+    # database method to inser the librarian 
+    def insert_librarian(self, librarian):
+        self.add_entry(
+            librarian.username,
+            librarian.password,
+            librarian.name,
+            librarian.contactInfo
+        )
+
+    # database method to delete a librarian 
+    def delete_librarian(self, username):
+        self.delete_entry(username)
 
 
     ## database method to update the librarian records      
-   # def update_librarian(self, username, password, name, contactInfo):
+    def update_librarian(self, username, new_password, new_name, new_contactInfo):
+        self.update_entry(username, new_password, new_name, new_contactInfo)
 
 
-        ## database method to insert the pubilsher records
+class PublisherUsage(PublisherManagement):
+    def __init__(self):
+        super().__init__()
 
-   # def insert_publisher(self, publisher):
+    # database method to insert the publisher records
+    def insert_publisher(self, publisher):
+        self.add_entry(
+            publisher.publishername,
+            publisher.address,
+            publisher.contactdetails
+        )
 
-      
+    # database method to delete the publisher records          
+    def delete_publisher(self, publishername):
+                self.delete_entry(publishername)
 
-    #### database method to delete the publisher records          
-   # def delete_publisher(self, publishername):
-      
+    # database method to update the publisher records      
+    def update_publisher(self, publishername, address, contactdetails):
+        self.update_entry(publishername, address, contactdetails)
 
-    ## database method to update the publisher records      
-   # def update_publisher(self, publishername, address, contactdetails):
-       
 
-        ## database method to insert the User records
 
-    #def insert_user(self, user):
+    ## database method to insert the User records
+class UserManagement(CommonUserManagement):
+    def __init__(self):
+        super().__init__()
+
+    # database method to inser the user 
+    def insert_user(self, user):
+        self.add_entry(
+            user.username,
+            user.password,
+            user.name,
+            user.contactInfo
+        )
+
+    # database method to delete a librarian 
+    def delete_librarian(self, username):
+        self.delete_entry(username)
+
+
+    ## database method to update the librarian records      
+    # def update_librarian(self, username, new_password, new_name, new_contactInfo):
+    #     self.update_entry(username, new_password, new_name, new_contactInfo)
+
+    # def insert_user(self, user):
       
 
     #### database method to delete the user records          
