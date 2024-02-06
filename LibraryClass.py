@@ -4,15 +4,14 @@ import sqlite3  ## to write the SQL queries
 import datetime
 
 
-## function to connect python to a database
+class projectPython:
+    pass
+
+
+# function to connect python to a database
 def connect():
     return sqlite3.connect('Library.db')
 
-
-# class projectPython():
-#     def __init__(self):
-#         pass
-    
 
 class CommonUser(projectPython):
     def __init__(self, username, password, name, contactInfo):
@@ -24,14 +23,14 @@ class CommonUser(projectPython):
 
 ## Librarian class with same as Common User attributes
 class Librarian(CommonUser):
-    def __init__(self):
-        super.__init__()  ## super to access the attributes from Common User class {Inheritance}
+    def __init__(self, username, password, name, contactInfo):
+        super().__init__(username, password, name, contactInfo)  ## super to access the attributes from Common User class {Inheritance}
 
 
 ## User class with same as Common User attributes    
 class User(CommonUser):
-    def __init__(self):
-        super.__init__()  ## super to access the attributes from Common User class {Inheritance}
+    def __init__(self, username, password, name, contactInfo):
+        super().__init__(username, password, name, contactInfo)  ## super to access the attributes from Common User class {Inheritance}
 
 
 ## Publisher class with its attributes
@@ -97,24 +96,32 @@ class PublisherManagement(Publisher):
     def __init__(self):
         self.publishstorage = []
 
-    ## method to add entry    
+    # method to add entry    
     def add_entry(self, publishername, address, contactdetails):
         self.publishstorage.append(
             {"Publisher name is ": publishername, "address ": address, "contactdetails are": contactdetails})
 
-    ## method to delete entry
+    # method to delete entry
     def delete_entry(self, publishername):
-        for entry in self.publishstorage:
-            if entry["publisher name is "] == publishername:
-                self.publishstorage.remove(entry)
+        if publishername:
+            for entry in self.publishstorage:
+                if entry["publisher name is "] == publishername:
+                    self.publishstorage.remove(entry)
+                    break
+        else:
+            print("Invalid choice. Please enter a valid publisher name.")
 
-    ##method to update entry
+
+    # method to update entry
     def update_entry(self,publishername,new_address,new_contactdetails):
-        for entry in self.publishstorage:
-            if entry["Publisher name is "] == publishername:
-                entry["address "] = new_address
-                entry["contactdetails are"] = new_contactdetails
-                break
+        if publishername and new_address and new_contactdetails:
+            for entry in self.publishstorage:
+                if entry["Publisher name is "] == publishername:
+                    entry["address "] = new_address
+                    entry["contactdetails are"] = new_contactdetails
+                    break
+        else:
+            print("Please fill in all the required fields.")
 
 
 
@@ -130,20 +137,31 @@ class BookManagement(Book):
 
     ## method to delete entry
     def delete_book(self, ISBN):
-        for entry in self.bookstorage:
-            if entry["ISBN "] == ISBN:
-                self.bookstorage.remove(entry)
+        if ISBN:
+            for entry in self.bookstorage:
+                if entry["ISBN "] == ISBN:
+                    self.bookstorage.remove(entry)
+        else:
+            print("Invalid choice. Please enter a valid ISBN.")
+
 
     ## method to update entry  
-    def update_book(self,new_title, new_author, new_genre,ISBN,new_quantity,new_publication_year):
-        for entry in self.bookstorage:
-            if entry["ISBN "] == ISBN:
-                entry["title "] = new_title
-                entry["author "] = new_author
-                entry["genre "] = new_genre
-                entry["quantity "] = new_quantity
-                entry["publication year "] = new_publication_year
-                break
+    def update_book(self, new_title, new_author, new_genre, ISBN, new_quantity, new_publication_year):
+        if ISBN:
+            isbn_found = False
+            for entry in self.bookstorage:
+                if entry["ISBN "] == ISBN:
+                    entry["title "] = new_title
+                    entry["author "] = new_author
+                    entry["genre "] = new_genre
+                    entry["quantity "] = new_quantity
+                    entry["publication year "] = new_publication_year
+                    isbn_found = True
+                    break
+            if not isbn_found:
+                print("ISBN not found in the book storage.")
+        else:
+            print("Invalid choice. Please enter a valid ISBN.")
 
 
 class TransactionManagement(Transaction):
@@ -241,13 +259,13 @@ class Database:
         self.conn.commit()
 
 
+
     ## database method to insert the librarian records
     def insert_librarian(self, librarian):
         self.cursor.execute('''
             INSERT INTO Librarian (username, password, name, contactInfo) VALUES (?, ?, ?, ?)
         ''', (librarian.username, librarian.password, librarian.name, librarian.contactInfo))
         
-
     # database method to delete a librarian 
     def delete_librarian(self, username):
         self.cursor.execute('''
@@ -263,68 +281,81 @@ class Database:
         ''', (password, name, contactInfo, username))
 
 
+
     # database method to insert the publisher records
     def insert_publisher(self, publisher):
-        self.add_entry(
-            publisher.publishername,
-            publisher.address,
-            publisher.contactdetails
-        )
+        self.cursor.execute('''
+            INSERT INTO Publisher (publishername, address, contactdetails) VALUES (?, ?, ?)
+        ''', (publisher.publishername, publisher.address, publisher.contactdetails))
 
     # database method to delete the publisher records          
     def delete_publisher(self, publishername):
-                self.delete_entry(publishername)
+        self.cursor.execute('''
+            DELETE FROM Publisher WHERE publishername = ?
+        ''', (publishername,))
 
     # database method to update the publisher records      
     def update_publisher(self, publishername, address, contactdetails):
-        self.update_entry(publishername, address, contactdetails)
+        self.cursor.execute('''
+            UPDATE Publisher
+            SET address = ?, contactdetails = ?
+            WHERE publishername = ?
+        ''', (address, contactdetails, publishername))
 
 
 
-    ## database method to insert the User records
-
+    # database method to insert the User records
     def insert_user(self, user):
         self.cursor.execute('''
             INSERT INTO User (username, password, name, contactInfo) VALUES (?, ?, ?, ?)
         ''', (user.username, user.password, user.name, user.contactInfo))
 
-    # database method to delete a librarian 
+    # database method to delete a User 
     def delete_user(self, username):
-        self.delete_entry(username)
+        self.cursor.execute('''
+            DELETE FROM User WHERE username = ?
+        ''', (username,))
 
 
-    ## database method to update the librarian records      
-    # def update_librarian(self, username, new_password, new_name, new_contactInfo):
-    #     self.update_entry(username, new_password, new_name, new_contactInfo)
-
-    # def insert_user(self, user):
-      
-
-    #### database method to delete the user records          
-  
-    ## database method to update the user records      
- 
-
-    #def insert_book(self, book):
-   
-
-    ## database method to delete the book records          
+    # database method to update the User records      
+    def update_user(self, username, password, name, contactInfo):
+        self.cursor.execute('''
+            UPDATE User
+            SET password = ?, name = ?, contactInfo = ?
+            WHERE username = ?
+        ''', (password, name, contactInfo, username))
 
 
-    ## database method to update the book records      
-    #def update_book(self, ISBN, title, author, genre, quantity, publication_year):
-  
+    # database method to insert a book
+    def insert_book(self, book):
+        self.cursor.execute('''
+            INSERT INTO Books (title, author, genre, ISBN, quantity, publication_year) VALUES (?, ?, ?, ?, ?, ?)
+        ''', (book.title, book.author, book.genre, book.ISBN, book.quantity, book.publication_year))
 
-        ## database method to insert the transaction records
+    # database method to delete the book records          
+    def delete_book(self, ISBN):
+        self.cursor.execute('''
+            DELETE FROM Books WHERE ISBN = ?
+        ''', (ISBN,))
 
+    # database method to update the book records      
+    def update_book(self, ISBN, title, author, genre, quantity, publication_year):
+        self.cursor.execute('''
+            UPDATE Books
+            SET title = ?, author = ?, genre = ?, quantity = ?, publication_year = ?
+            WHERE ISBN = ?
+        ''', (title, author, genre, quantity, publication_year, ISBN))
+
+
+
+    # database method to insert the transaction records
     def check_out_book(self, transaction1):
-        userCheck = self.cursor.execute('select username from User where (username = ?);',
-                                        (transaction1.username,)).fetchone()
-        ISBNcheck = self.cursor.execute('select ISBN from Books where (ISBN = ?);', (transaction1.ISBN,)).fetchone()
+        userCheck = self.cursor.execute('SELECT username from User where (username = ?);', (transaction1.username,)).fetchone()
+        ISBNcheck = self.cursor.execute('SELECT ISBN from Books where (ISBN = ?);', (transaction1.ISBN,)).fetchone()
         if userCheck is not None:
             if ISBNcheck is not None:
                 self.cursor.execute('''
-                                    insert into Transactions (username, ISBN, duedate,duestatus )
+                                    INSERT into Transactions (username, ISBN, duedate, duestatus )
                                     values (?,?,?,? );
                                     ''', (
                     transaction1.username, transaction1.ISBN, transaction1.duedate, transaction1.duestatus))
@@ -333,11 +364,26 @@ class Database:
         else:
             print("No user is found")
 
-            ## database method to insert the checkin  records
 
-   # def check_in_book(self, transaction2):
-      
 
+    # database method to insert the checkin  records
+    def check_in_book(self, transaction2):
+        userCheck = self.cursor.execute('SELECT username from User where (username = ?);', (transaction2.username,)).fetchone()
+        ISBNcheck = self.cursor.execute('SELECT ISBN from Books where (ISBN = ?);', (transaction2.ISBN,)).fetchone()
+        if userCheck is not None:
+            if ISBNcheck is not None:
+                self.cursor.execute('''
+                                    UPDATE Transactions 
+                                    SET duestatus = ? WHERE username = ? AND ISBN = ?;
+                                    ''', (transaction2.duestatus, transaction2.ISBN))
+            else:
+                print("No book is found in inventory")
+        else:
+            print("No user is found")
+
+    
+
+    # database method to view the transaction history
     def view_transaction_history(self, transaction4):
         print("user input: ", transaction4)
         transaction4 = '%' + transaction4 + '%'
@@ -360,53 +406,53 @@ class Database:
         else:
             print("No transaction history found.")
 
-    ## database method to search the books from books records
-    
-    def search_books(self, search_query):
-        search_query = "SELECT * FROM books WHERE title LIKE ? OR author LIKE ?"  
 
-        self.cursor.execute(search_query)
+    # database method to search the books from books records    
+    def search_books(self, search_query):
+        query = "SELECT * FROM Books WHERE title LIKE ? OR author LIKE ?"
+        self.cursor.execute(query,(search_query))
         books = self.cursor.fetchall()
         return books
              
 
-    ## database method to filter the book records based on genre              
+    # database method to filter the book records based on genre              
     def filter_books_by_genre(self, genre):
-        genre = "SELECT * FROM books WHERE genre LIKE ? "  
-      
-        self.cursor.execute(genre)
+        query = "SELECT * FROM Books WHERE genre LIKE ?"
+        self.cursor.execute(query, (genre,))
         books = self.cursor.fetchall()
         return books
 
-    ## database method to filter the users based on name
-    def filter_users_by_name(self, name):
-       name = "SELECT * FROM books WHERE name LIKE ? "  
-      
-       self.cursor.execute(name)
-       books = self.cursor.fetchall()
-       return books
 
-    ## database method to filter the books records based on time of publication range
+    # database method to filter the users based on name
+    def filter_users_by_name(self, name):
+        query = "SELECT * FROM User WHERE name LIKE ?"
+        self.cursor.execute(query, (name,))
+        users = self.cursor.fetchall()
+        if users:
+            return users
+        else:
+            print(f"No users found with the name '{name}'")
+            return None
+        
+
+
+    # database method to filter the books records based on time of publication range
     def filter_books_by_year_range(self, start_year, end_year):
-       
-       name = "SELECT * FROM books WHERE publication_year BETWEEN start_year AND end_year  "  
-      
-       self.cursor.execute(name)
-       books = self.cursor.fetchall()
-       return books
+        query = "SELECT * FROM Books WHERE publication_year BETWEEN ? AND ?"
+        self.cursor.execute(query, (start_year, end_year))
+        books = self.cursor.fetchall()
+        return books
      
 
     ## database method to find  the checked out books based on username
     def find_checked_out_books(self, username):
-        
-        name = "SELECT * FROM Transactions WHERE username LIKE ?  "  
-      
-        self.cursor.execute(name)
+        query = "SELECT * FROM Transactions WHERE username LIKE ?"
+        self.cursor.execute(query, (username,))
         books = self.cursor.fetchall()
         return books
 
    
-        ## sorting books method based on publication year
+    # sorting books method based on publication year
 
     def sort_books(self, sort_criteria):
         if sort_criteria == 'title':
@@ -484,7 +530,7 @@ if __name__ == "__main__":
                             print(f"{updateUsername} record is updated")
 
                         elif libChoice == '3':
-                            deleteusername = input("Please enter the librarian username to remove from the table")
+                            deleteusername = input("Please enter the librarian username to remove from the table: ")
                             db.delete_librarian(deleteusername)
 
                             ## Prompting the user the returning to the main menu
@@ -501,8 +547,8 @@ if __name__ == "__main__":
                     while True:
                         print("====Publisher Management Section=====")
                         print("1. Add a publisher record")
-                        print("2. Remove a publisher record")
-                        print("3. Update a publisher record")
+                        print("2. Update a publisher record")
+                        print("3. Remove a publisher record")
                         print("4. Return to Administrator Menu")
 
                         ## Asking the user for input
@@ -510,20 +556,20 @@ if __name__ == "__main__":
 
                         if pubChoice == '1':
                             publishername = input("Please enter the publisher username: ")
-                            address = input("Please enter the address")
-                            contactdetails = input("please enter the contact details")
+                            address = input("Please enter the address: ")
+                            contactdetails = input("Please enter the contact details: ")
                             pub1 = Publisher(publishername, address, contactdetails)
                             db.insert_publisher(pub1)
                             print(f"{pub1} added to the database.")
 
                         elif pubChoice == '2':
-                            updatePublishername = input("Please enter the publisher name to update from the table")
+                            updatePublishername = input("Please enter the publisher name to update from the table: ")
                             updateaddress = input("Please enter the update address : ")
-                            updateContactdetails = input("Please enter the updated contact details")
+                            updateContactdetails = input("Please enter the updated contact details: ")
                             db.update_publisher(updatePublishername, updateaddress, updateContactdetails)
                             print(f"{updatePublishername} record is updated")
                         elif pubChoice == '3':
-                            deleteusername = input("Please enter the publisher name to remove from the table")
+                            deleteusername = input("Please enter the publisher name to remove from the table: ")
                             db.delete_publisher(deleteusername)
 
                             ## Prompting the user the returning to the main menu
@@ -539,8 +585,8 @@ if __name__ == "__main__":
                     while True:
                         print("====User Management Section=====")
                         print("1. Add a User record")
-                        print("2. Remove a User record")
-                        print("3. Update a User record")
+                        print("2. Update a User record")
+                        print("3. Remove a User record")
                         print("4. Find User")
                         print("5. Return to Administrator Menu")
 
@@ -549,35 +595,39 @@ if __name__ == "__main__":
 
                         if userChoice == '1':
                             username = input("Please enter the User username: ")
-                            password = input("Please enter the password")
-                            name = input("Please enter the name")
-                            contactInfo = input("please enter the contact information")
+                            password = input("Please enter the password: ")
+                            name = input("Please enter the name: ")
+                            contactInfo = input("please enter the contact information: ")
                             user1 = CommonUser(username, password, name, contactInfo)
                             db.insert_user(user1)
-                            print(f"{user1} added to the storage.")
+                            print(f"user {username} added to the storage.")
 
                         elif userChoice == '2':
-                            updateUsername = input("Please enter the User username to update from the table")
-                            updatedpassword = input("Please enter the updated password")
+                            updateUsername = input("Please enter the User username to update from the table: ")
+                            updatedpassword = input("Please enter the updated password: ")
                             updatename = input("Please enter the update name: ")
-                            updateContactinfo = input("Please enter the updated contact details")
+                            updateContactinfo = input("Please enter the updated contact details: ")
                             db.update_user(updateUsername, updatedpassword, updatename, updateContactinfo)
                             print(f"{updateUsername} record is updated")
 
                         elif userChoice == '3':
-                            deleteusername = input("Please enter the User username to remove from the table")
+                            deleteusername = input("Please enter the User username to remove from the table: ")
                             db.delete_user(deleteusername)
 
                         elif userChoice == '4':
-                            findname = input("Please enter the name of the user to find")
-                            db.filter_users_by_name(findname)
+                            findname = input("Please enter the name of the user to find: ")
+                            users = db.filter_users_by_name(findname)
+                            if users is not None:
+                                for user in users:
+                                    print(f"Username: {user.username}, Name: {user.name}, Contact Info: {user.contactInfo}")
+                                                    
 
                             ## Prompting the user the returning to the main menu
                         elif userChoice == '5':
-                            print("returning to Admin menu, Thank you.")
+                            print("Returning to Admin menu, Thank you.")
                             break
                         else:
-                            print("Invalid choice. Please enter a number between 1 and 4.")
+                            print("Invalid choice. Please enter a number between 1 and 5.")
 
                             ## Prompting the user the returning to the main menu
                 elif adminchoice == '4':
@@ -598,9 +648,9 @@ if __name__ == "__main__":
                 print("4. Return to main menu")
 
                 ## Asking the user for input
-                libraianchoice = input("Please choose between (1-4)")
+                librarianchoice = input("Please choose between (1-4)")
 
-                if libraianchoice == '1':
+                if librarianchoice == '1':
 
                     ##Printing the  menu
                     while True:
@@ -608,7 +658,7 @@ if __name__ == "__main__":
                         print("1. Add a book to the inventory")
                         print("2. Edit a book to the inventory")
                         print("3. Remove a book to the inventory")
-                        print("4. Return to Librarian Menu")
+                        print("4. Return to Librarian Menu:")
 
                         ## Asking the user for input
                         bookChoice = input("Please choose between (1-4)")
@@ -618,25 +668,26 @@ if __name__ == "__main__":
                             bookauthor = input("Please enter the author name: ")
                             bookgenre = input("Please enter the genre of the book: ")
                             bookISBN = int(input("Please enter the ISBN of the book: "))
-                            bookquantity = int(input("Please enter the quantity "))
-                            bookyear = int(input("Please enter the publication year"))
+                            bookquantity = int(input("Please enter the quantity: "))
+                            bookyear = int(input("Please enter the publication year: "))
                             book1 = Book(booktitle, bookauthor, bookgenre, bookISBN, bookquantity, bookyear)
                             db.insert_book(book1)
-                            print(f"{book1} added to the inventory.")
+                            print(f"{booktitle} added to the inventory.")
 
                         elif bookChoice == '2':
                             updatebookISBN = int(input("Please enter the ISBN of the book to update: "))
                             updatebooktitle = input("Please enter the updated title of the book: ")
                             updatebookauthor = input("Please enter the updated author name: ")
                             updatebookgenre = input("Please enter the updated genre of the book: ")
-                            updatebookquantity = int(input("Please enter the updated quantity "))
-                            updatebookyear = int(input("Please enter the updated publication year"))
-                            db.update_book(updatebookISBN)
-                            print(f"{updatebooktitle} updated to the inventory.")
+                            updatebookquantity = int(input("Please enter the updated quantity: "))
+                            updatebookyear = int(input("Please enter the updated publication year: "))
+                            db.update_book(updatebookISBN,updatebooktitle,updatebookauthor,updatebookgenre,updatebookquantity,updatebookyear)
+                            print(f"{updatebooktitle} updated in the inventory.")
 
                         elif bookChoice == '3':
-                            deletebookISBN = int(input("Please enter the book ISBN to remove from the inventory"))
+                            deletebookISBN = int(input("Please enter the book ISBN to remove it from the inventory: "))
                             db.delete_book(deletebookISBN)
+                            print(f"The book with the ISBN {deletebookISBN} was deleted from the inventory")
 
                             ## Prompting the user the returning to the main menu
                         elif bookChoice == '4':
@@ -645,7 +696,7 @@ if __name__ == "__main__":
                         else:
                             print("Invalid choice. Please enter a number between 1 and 4.")
 
-                elif libraianchoice == '2':
+                elif librarianchoice == '2':
 
                     ##Printing the  menu 
                     while True:
@@ -685,9 +736,9 @@ if __name__ == "__main__":
                             print("returning to Librarian menu, Thank you.")
                             break
                         else:
-                            print("Invalid choice. Please enter a number between 1 and 4.")
+                            print("Invalid choice. Please enter a number between 1 and 3.")
 
-                elif libraianchoice == '3':
+                elif librarianchoice == '3':
 
                     ## printing the  menu  
                     while True:
@@ -726,9 +777,10 @@ if __name__ == "__main__":
                             deleteusername = input("Please enter the User username to remove from the table")
                             db.delete_user(deleteusername)
 
-                        elif usermenuchoice == '4':
+                        elif manageuserchoice == '4':
                             findname = input("Please enter the name of the user to find")
                             db.filter_users_by_name(findname)
+                            
 
                             ## Prompting the user the returning to the main menu
                         elif manageuserchoice == '5':
@@ -737,10 +789,10 @@ if __name__ == "__main__":
 
                             ## Prompting the user when an invalid input is given, and presents the menu again
                         else:
-                            print("Invalid choice. Please enter a number between 1 and 4.")
+                            print("Invalid choice. Please enter a number between 1 and 5.")
 
                             ## Prompting the user the returning to the main menu
-                elif libraianchoice == '4':
+                elif librarianchoice == '4':
                     print("Returning to the Main menu, Thank you.!!")
                     break
 
@@ -788,14 +840,14 @@ if __name__ == "__main__":
 
 
                 ## Prompting the user the returning to the main menu 
-                elif usermenuchoice == '5':
+                elif usermenuchoice == '4':
                     print("Returning to main menu, Thank you..!!")
                     break
 
 
                 ## Message prompt about invalid message and presents the menu again
                 else:
-                    print("Invalid input, please choose from (1-5)")
+                    print("Invalid input, please choose from (1-4)")
 
                     ## Prompting the user the end of program and exiting the console
         elif mainchoice == '4':
@@ -805,4 +857,4 @@ if __name__ == "__main__":
 
         ## Prompting the user when an invalid input is given, and presents the menu again
         else:
-            print("Invalid choice. Please enter a number between 1 and 5.")
+            print("Invalid choice. Please enter a number between 1 and 4.")
