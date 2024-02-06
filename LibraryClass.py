@@ -9,9 +9,9 @@ def connect():
     return sqlite3.connect('Library.db')
 
 
-class projectPython():
-    def __init__(self):
-        pass
+# class projectPython():
+#     def __init__(self):
+#         pass
     
 
 class CommonUser(projectPython):
@@ -241,34 +241,27 @@ class Database:
         self.conn.commit()
 
 
-
     ## database method to insert the librarian records
-class LibrarianManagement(CommonUserManagement):
-    def __init__(self):
-        super().__init__()
-
-    # database method to inser the librarian 
     def insert_librarian(self, librarian):
-        self.add_entry(
-            librarian.username,
-            librarian.password,
-            librarian.name,
-            librarian.contactInfo
-        )
+        self.cursor.execute('''
+            INSERT INTO Librarian (username, password, name, contactInfo) VALUES (?, ?, ?, ?)
+        ''', (librarian.username, librarian.password, librarian.name, librarian.contactInfo))
+        
 
     # database method to delete a librarian 
     def delete_librarian(self, username):
-        self.delete_entry(username)
-
+        self.cursor.execute('''
+            DELETE FROM Librarian WHERE username = ?
+        ''', (username,))
 
     ## database method to update the librarian records      
-    def update_librarian(self, username, new_password, new_name, new_contactInfo):
-        self.update_entry(username, new_password, new_name, new_contactInfo)
+    def update_librarian(self, username, password, name, contactInfo):
+        self.cursor.execute('''
+            UPDATE Librarian
+            SET password = ?, name = ?, contactInfo = ?
+            WHERE username = ?
+        ''', (password, name, contactInfo, username))
 
-
-class PublisherUsage(PublisherManagement):
-    def __init__(self):
-        super().__init__()
 
     # database method to insert the publisher records
     def insert_publisher(self, publisher):
@@ -289,21 +282,14 @@ class PublisherUsage(PublisherManagement):
 
 
     ## database method to insert the User records
-class UserManagement(CommonUserManagement):
-    def __init__(self):
-        super().__init__()
 
-    # database method to inser the user 
     def insert_user(self, user):
-        self.add_entry(
-            user.username,
-            user.password,
-            user.name,
-            user.contactInfo
-        )
+        self.cursor.execute('''
+            INSERT INTO User (username, password, name, contactInfo) VALUES (?, ?, ?, ?)
+        ''', (user.username, user.password, user.name, user.contactInfo))
 
     # database method to delete a librarian 
-    def delete_librarian(self, username):
+    def delete_user(self, username):
         self.delete_entry(username)
 
 
@@ -378,7 +364,7 @@ class UserManagement(CommonUserManagement):
     
     def search_books(self, search_query):
         search_query = "SELECT * FROM books WHERE title LIKE ? OR author LIKE ?"  
-      
+
         self.cursor.execute(search_query)
         books = self.cursor.fetchall()
         return books
