@@ -375,23 +375,50 @@ class UserManagement(CommonUserManagement):
             print("No transaction history found.")
 
     ## database method to search the books from books records
-   # def search_books(self, search_query):
+    
+    def search_books(self, search_query):
+        search_query = "SELECT * FROM books WHERE title LIKE ? OR author LIKE ?"  
       
+        self.cursor.execute(search_query)
+        books = self.cursor.fetchall()
+        return books
+             
 
     ## database method to filter the book records based on genre              
-    #def filter_books_by_genre(self, genre):
-
+    def filter_books_by_genre(self, genre):
+        genre = "SELECT * FROM books WHERE genre LIKE ? "  
+      
+        self.cursor.execute(genre)
+        books = self.cursor.fetchall()
+        return books
 
     ## database method to filter the users based on name
-    #def filter_users_by_name(self, name):
+    def filter_users_by_name(self, name):
+       name = "SELECT * FROM books WHERE name LIKE ? "  
       
+       self.cursor.execute(name)
+       books = self.cursor.fetchall()
+       return books
 
     ## database method to filter the books records based on time of publication range
-   # def filter_books_by_year_range(self, start_year, end_year):
+    def filter_books_by_year_range(self, start_year, end_year):
+       
+       name = "SELECT * FROM books WHERE publication_year BETWEEN start_year AND end_year  "  
+      
+       self.cursor.execute(name)
+       books = self.cursor.fetchall()
+       return books
      
 
     ## database method to find  the checked out books based on username
-    # def find_checked_out_books(self, username):
+    def find_checked_out_books(self, username):
+        
+        name = "SELECT * FROM Transactions WHERE username LIKE ?  "  
+      
+        self.cursor.execute(name)
+        books = self.cursor.fetchall()
+        return books
+
    
         ## sorting books method based on publication year
 
