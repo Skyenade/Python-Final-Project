@@ -428,15 +428,11 @@ class Database:
         query = "SELECT * FROM User WHERE name LIKE ?"
         self.cursor.execute(query, (name,))
         users = self.cursor.fetchall()
-        user_list = []
-        for user in users:
-            user_obj = User(*user)
-            user_list.append(user_obj)
-            if user_list:
-                return user_list
+        if users:
+            return users
         else:
             print(f"No users found with the name '{name}'")
-        return None
+            return None
         
 
 
@@ -631,7 +627,7 @@ if __name__ == "__main__":
                             print("Returning to Admin menu, Thank you.")
                             break
                         else:
-                            print("Invalid choice. Please enter a number between 1 and 4.")
+                            print("Invalid choice. Please enter a number between 1 and 5.")
 
                             ## Prompting the user the returning to the main menu
                 elif adminchoice == '4':
@@ -740,7 +736,7 @@ if __name__ == "__main__":
                             print("returning to Librarian menu, Thank you.")
                             break
                         else:
-                            print("Invalid choice. Please enter a number between 1 and 4.")
+                            print("Invalid choice. Please enter a number between 1 and 3.")
 
                 elif librarianchoice == '3':
 
@@ -793,7 +789,7 @@ if __name__ == "__main__":
 
                             ## Prompting the user when an invalid input is given, and presents the menu again
                         else:
-                            print("Invalid choice. Please enter a number between 1 and 4.")
+                            print("Invalid choice. Please enter a number between 1 and 5.")
 
                             ## Prompting the user the returning to the main menu
                 elif librarianchoice == '4':
@@ -844,14 +840,14 @@ if __name__ == "__main__":
 
 
                 ## Prompting the user the returning to the main menu 
-                elif usermenuchoice == '5':
+                elif usermenuchoice == '4':
                     print("Returning to main menu, Thank you..!!")
                     break
 
 
                 ## Message prompt about invalid message and presents the menu again
                 else:
-                    print("Invalid input, please choose from (1-5)")
+                    print("Invalid input, please choose from (1-4)")
 
                     ## Prompting the user the end of program and exiting the console
         elif mainchoice == '4':
@@ -861,4 +857,4 @@ if __name__ == "__main__":
 
         ## Prompting the user when an invalid input is given, and presents the menu again
         else:
-            print("Invalid choice. Please enter a number between 1 and 5.")
+            print("Invalid choice. Please enter a number between 1 and 4.")
